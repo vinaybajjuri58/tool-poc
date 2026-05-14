@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import type { ChatMessage } from '@/types';
+import { renderMarkdown } from '@/lib/markdown';
 
 interface ChatPanelProps {
   messages: ChatMessage[];
@@ -78,7 +79,16 @@ export default function ChatPanel({
                   : 'bg-gray-800 text-gray-100 rounded-bl-md'
               }`}
             >
-              {msg.content}
+              {msg.role === 'assistant' ? (
+                <div
+                  className="prose prose-invert prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: renderMarkdown(msg.content),
+                  }}
+                />
+              ) : (
+                msg.content
+              )}
             </div>
           </div>
         ))}

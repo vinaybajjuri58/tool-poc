@@ -11,46 +11,13 @@ interface FlowNode {
   detail?: string
 }
 
-const NODE_CONFIG: Record<
-  FlowNodeType,
-  { color: string; bg: string; border: string; icon: string }
-> = {
-  user: {
-    color: "text-blue-400",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
-    icon: "👤",
-  },
-  ai_request: {
-    color: "text-purple-400",
-    bg: "bg-purple-500/10",
-    border: "border-purple-500/30",
-    icon: "🧠",
-  },
-  tool_call: {
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/30",
-    icon: "🔧",
-  },
-  tool_execute: {
-    color: "text-yellow-400",
-    bg: "bg-yellow-500/10",
-    border: "border-yellow-500/30",
-    icon: "⚙️",
-  },
-  tool_result: {
-    color: "text-green-400",
-    bg: "bg-green-500/10",
-    border: "border-green-500/30",
-    icon: "📊",
-  },
-  ai_response: {
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-500/30",
-    icon: "💬",
-  },
+const NODE_ICON: Record<FlowNodeType, string> = {
+  user: "👤",
+  ai_request: "🧠",
+  tool_call: "🔧",
+  tool_execute: "⚙️",
+  tool_result: "📊",
+  ai_response: "💬",
 }
 
 interface FlowPanelProps {
@@ -69,60 +36,85 @@ export default function FlowPanel({ nodes, isStreaming }: FlowPanelProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-gray-700/50 shrink-0">
-        <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-          AI Customer Support
+      <div className="px-4 py-3 border-b border-gray-800 shrink-0">
+        <h2 className="text-sm font-semibold text-teal-400 uppercase tracking-wide">
+          Reasoning Flow
         </h2>
       </div>
 
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-4 py-3 space-y-0"
+        className="flex-1 overflow-y-auto px-4 py-4"
       >
         {nodes.length === 0 && !isStreaming && (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-            <p>Send a message to see the AI reasoning flow</p>
+          <div className="flex items-center justify-center h-full text-gray-600 text-xs">
+            <p>Send a message to see the reasoning flow</p>
           </div>
         )}
 
-        {nodes.map((node, i) => {
-          const config = NODE_CONFIG[node.nodeType] || NODE_CONFIG.ai_request
-          const isLast = i === nodes.length - 1
+        <div className="flex flex-col items-center gap-0">
+          {nodes.map((node, i) => {
+            const isLast = i === nodes.length - 1
+            const isLoading = node.status === "loading"
 
-          return (
-            <div key={node.id}>
-              {i > 0 && (
-                <div className="flex justify-center py-0.5">
-                  <div className="w-0.5 h-4 bg-gray-600/50 rounded" />
+            const formattedDetail = node.detail
+              ? (() => {
+                  try {
+                    return JSON.stringify(JSON.parse(node.detail), null, 2)
+                  } catch {
+                    return node.detail
+                  }
+                })()
+              : null
+
+            return (
+              <div key={node.id} className="flex flex-col items-center w-full">
+                {i > 0 && (
+                  <div className="w-px h-6 bg-gray-700" />
+                )}
+
+                {/* Node circle + label */}
+                <div className="flex items-center gap-3 w-full max-w-[280px]">
+                  <div
+                    className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg border-2 transition-colors ${
+                      isLoading
+                        ? "border-teal-400 bg-teal-500/10 animate-pulse"
+                        : "border-gray-700 bg-gray-800"
+                    }`}
+                  >
+                    {NODE_ICON[node.nodeType] || "●"}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-teal-400 truncate">
+                      {node.label}
+                    </p>
+                    {node.status === "loading" && (
+                      <p className="text-[10px] text-gray-500">Processing...</p>
+                    )}
+                    {node.status === "error" && (
+                      <p className="text-[10px] text-red-400">Failed</p>
+                    )}
+                    {node.status === "done" && !formattedDetail && (
+                      <p className="text-[10px] text-gray-600">Complete</p>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div
-                className={`rounded-lg border ${config.border} ${config.bg} p-3 relative`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">{config.icon}</span>
-                  <span className={`text-xs font-medium ${config.color}`}>
-                    {node.label}
-                  </span>
-                  {node.status === "loading" && (
-                    <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin ml-auto" />
-                  )}
-                  {node.status === "done" && (
-                    <span className="ml-auto w-2 h-2 bg-green-400 rounded-full" />
-                  )}
-                  {node.status === "error" && (
-                    <span className="ml-auto w-2 h-2 bg-red-400 rounded-full" />
-                  )}
-                </div>
-                {node.detail && (
-                  <p className="mt-1 text-[10px] text-gray-500 font-mono leading-relaxed break-all">
-                    {node.detail}
-                  </p>
+
+                {/* Detail card */}
+                {formattedDetail && (
+                  <div className="mt-2 mb-1 w-full max-w-[280px]">
+                    <div className="bg-gray-800/50 border border-gray-800 rounded-lg p-2.5">
+                      <pre className="text-[11px] text-gray-400 font-mono leading-relaxed whitespace-pre-wrap break-all">
+                        {formattedDetail}
+                      </pre>
+                    </div>
+                  </div>
                 )}
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )

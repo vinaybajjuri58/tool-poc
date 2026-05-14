@@ -138,7 +138,7 @@ export async function POST(req: Request) {
               send({
                 type: 'update_node',
                 status: 'done',
-                detail: `${resultStr.slice(0, 80)}${resultStr.length > 80 ? '...' : ''}`,
+                detail: resultStr,
               });
 
               send({
