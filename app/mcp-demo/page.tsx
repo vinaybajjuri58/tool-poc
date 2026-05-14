@@ -14,7 +14,7 @@ interface FlowNode {
   detail?: string;
 }
 
-export default function Home() {
+export default function MCPDemo() {
   const [apiKey, setApiKey] = useState('');
   const [showApiInput, setShowApiInput] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -75,7 +75,7 @@ export default function Home() {
       history.push({ role: 'user', content: text });
 
       try {
-        const response = await fetch('/api/chat', {
+        const response = await fetch('/api/mcp-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ messages: history, apiKey }),
@@ -140,19 +140,23 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-950 text-gray-100">
-      {/* Header with API Key */}
+      {/* Header */}
       <header className="shrink-0 border-b border-gray-800 px-4 py-3 flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🤖</span>
-          <h1 className="text-sm font-bold text-gray-200">
-            Customer Support AI
-          </h1>
+        <div className="flex items-center gap-3">
           <Link
-            href="/mcp-demo"
-            className="text-[11px] text-teal-400 hover:text-teal-300 transition-colors ml-3 flex items-center gap-1"
+            href="/"
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
           >
-            Swiggy MCP →
+            ← Customer Support
           </Link>
+          <div className="w-px h-5 bg-gray-700" />
+          <span className="text-lg">🛵</span>
+          <h1 className="text-sm font-bold text-gray-200">
+            Swiggy MCP Demo
+          </h1>
+          <span className="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-medium">
+            MCP
+          </span>
         </div>
 
         <div className="flex-1" />
@@ -167,7 +171,7 @@ export default function Home() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-..."
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 placeholder-gray-500 w-64 focus:outline-none focus:border-blue-500/50"
+              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 placeholder-gray-500 w-64 focus:outline-none focus:border-orange-500/50"
             />
             <button
               onClick={() => setShowApiInput(false)}
@@ -204,6 +208,16 @@ export default function Home() {
             messages={messages}
             onSend={handleSend}
             isStreaming={isStreaming}
+            placeholder="Ask about food, restaurants..."
+            suggestions={{
+              label: 'Ask about food, restaurants, or ordering',
+              queries: [
+                'Find biryani restaurants near me',
+                'Search for pizza places in Mumbai',
+                'Show me top-rated North Indian restaurants',
+                'What are the best desserts available?',
+              ],
+            }}
           />
         </div>
       </div>

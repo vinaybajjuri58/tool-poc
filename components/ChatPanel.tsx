@@ -8,12 +8,16 @@ interface ChatPanelProps {
   messages: ChatMessage[];
   onSend: (text: string) => void;
   isStreaming: boolean;
+  suggestions?: { label: string; queries: string[] };
+  placeholder?: string;
 }
 
 export default function ChatPanel({
   messages,
   onSend,
   isStreaming,
+  suggestions,
+  placeholder = 'Ask about a customer...',
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -44,15 +48,15 @@ export default function ChatPanel({
           <div className="flex items-center justify-center h-full text-gray-500 text-sm">
             <div className="text-center space-y-3">
               <p className="text-lg">💬</p>
-              <p>Ask about a customer to get started</p>
+              <p>{suggestions?.label || 'Ask about a customer to get started'}</p>
               <div className="space-y-2">
                 <p className="text-xs text-gray-600">Try:</p>
-                {[
+                {(suggestions?.queries || [
                   'Get details for Rahul Sharma',
                   'Show order history for Priya Patel',
                   'What open issues does Arjun Kumar have?',
                   "What is Vikram Singh's total spend?",
-                ].map((q) => (
+                ]).map((q) => (
                   <button
                     key={q}
                     onClick={() => onSend(q)}
@@ -115,7 +119,7 @@ export default function ChatPanel({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about a customer..."
+            placeholder={placeholder}
             disabled={isStreaming}
             className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500/50 disabled:opacity-50"
           />
