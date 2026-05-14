@@ -6,7 +6,7 @@ export async function GET() {
     const simplified = tools.map((t) => ({
       name: t.function.name,
       description: t.function.description || '',
-      parameters: t.function.parameters as Record<string, unknown>,
+      rawDefinition: JSON.stringify(t, null, 2),
     }));
 
     return Response.json({ tools: simplified });

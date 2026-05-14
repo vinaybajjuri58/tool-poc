@@ -14,7 +14,7 @@ interface FlowNode {
 export interface ToolInfo {
   name: string
   description: string
-  parameters?: Record<string, unknown>
+  rawDefinition: string
 }
 
 const NODE_ICON: Record<FlowNodeType, string> = {
@@ -71,22 +71,18 @@ export default function FlowPanel({ nodes, isStreaming, tools }: FlowPanelProps)
           {toolsOpen && (
             <div className="px-4 pb-3 space-y-1.5 max-h-[300px] overflow-y-auto">
               {tools.map((tool) => (
-                <details
-                  key={tool.name}
-                  className="group"
-                >
+                <details key={tool.name} className="group">
                   <summary className="cursor-pointer text-xs text-gray-400 hover:text-teal-400 transition-colors py-1 font-mono select-none">
                     {tool.name}
                   </summary>
-                  <div className="pl-1 mt-0.5 space-y-1">
+                  <div className="pl-1 mt-0.5 space-y-1.5">
                     <p className="text-[11px] text-gray-500 leading-relaxed">
                       {tool.description}
                     </p>
-                    {tool.parameters && (
-                      <pre className="text-[10px] text-gray-600 font-mono bg-gray-800/30 rounded p-1.5 overflow-x-auto">
-                        {JSON.stringify(tool.parameters, null, 2)}
-                      </pre>
-                    )}
+                    <p className="text-[10px] text-gray-600 font-medium">Raw tool definition sent to model:</p>
+                    <pre className="text-[10px] text-gray-500 font-mono bg-gray-800/60 border border-gray-700/50 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all">
+                      {tool.rawDefinition}
+                    </pre>
                   </div>
                 </details>
               ))}
@@ -95,10 +91,7 @@ export default function FlowPanel({ nodes, isStreaming, tools }: FlowPanelProps)
         </div>
       )}
 
-      <div
-        ref={containerRef}
-        className="flex-1 overflow-y-auto px-4 py-4"
-      >
+      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 py-4">
         {nodes.length === 0 && !isStreaming && (
           <div className="flex items-center justify-center h-full text-gray-600 text-xs">
             <p>Send a message to see the reasoning flow</p>
@@ -122,11 +115,8 @@ export default function FlowPanel({ nodes, isStreaming, tools }: FlowPanelProps)
 
             return (
               <div key={node.id} className="flex flex-col items-center w-full">
-                {i > 0 && (
-                  <div className="w-px h-6 bg-gray-700" />
-                )}
+                {i > 0 && <div className="w-px h-6 bg-gray-700" />}
 
-                {/* Node circle + label */}
                 <div className="flex items-center gap-3 w-full max-w-[280px]">
                   <div
                     className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg border-2 transition-colors ${
@@ -154,7 +144,6 @@ export default function FlowPanel({ nodes, isStreaming, tools }: FlowPanelProps)
                   </div>
                 </div>
 
-                {/* Detail card */}
                 {formattedDetail && (
                   <div className="mt-2 mb-1 w-full max-w-[280px]">
                     <div className="bg-gray-800/50 border border-gray-800 rounded-lg p-2.5">

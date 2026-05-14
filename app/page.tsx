@@ -28,7 +28,7 @@ export default function Home() {
   const customerTools: ToolInfo[] = TOOLS.map((t) => ({
     name: t.function.name,
     description: t.function.description || '',
-    parameters: t.function.parameters as Record<string, unknown>,
+    rawDefinition: JSON.stringify(t, null, 2),
   }));
 
   const addFlowNode = useCallback(
