@@ -3,7 +3,9 @@
 import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import FlowPanel from '@/components/FlowPanel';
+import type { ToolInfo } from '@/components/FlowPanel';
 import ChatPanel from '@/components/ChatPanel';
+import { TOOLS } from '@/lib/tools';
 import type { ChatMessage, FlowNodeType } from '@/types';
 
 interface FlowNode {
@@ -22,6 +24,12 @@ export default function Home() {
   const [isStreaming, setIsStreaming] = useState(false);
   const nodeMapRef = useRef<Map<string, number>>(new Map());
   let nodeCounter = useRef(0);
+
+  const customerTools: ToolInfo[] = TOOLS.map((t) => ({
+    name: t.function.name,
+    description: t.function.description || '',
+    parameters: t.function.parameters as Record<string, unknown>,
+  }));
 
   const addFlowNode = useCallback(
     (nodeType: FlowNodeType, label: string, status: 'loading' | 'done' | 'error' = 'done', detail?: string) => {
@@ -195,7 +203,7 @@ export default function Home() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Flow Panel */}
         <div className="w-[35%] min-w-[320px] border-r border-gray-800 bg-gray-900/50">
-          <FlowPanel nodes={flowNodes} isStreaming={isStreaming} />
+          <FlowPanel nodes={flowNodes} isStreaming={isStreaming} tools={customerTools} />
         </div>
 
         {/* Right: Chat Panel */}

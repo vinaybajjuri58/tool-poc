@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import FlowPanel from '@/components/FlowPanel';
+import type { ToolInfo } from '@/components/FlowPanel';
 import ChatPanel from '@/components/ChatPanel';
 import type { ChatMessage, FlowNodeType } from '@/types';
 
@@ -20,8 +21,18 @@ export default function MCPDemo() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [flowNodes, setFlowNodes] = useState<FlowNode[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [mcpTools, setMcpTools] = useState<ToolInfo[]>([]);
   const nodeMapRef = useRef<Map<string, number>>(new Map());
   let nodeCounter = useRef(0);
+
+  useEffect(() => {
+    fetch('/api/mcp-tools')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.tools) setMcpTools(data.tools);
+      })
+      .catch(() => {});
+  }, []);
 
   const addFlowNode = useCallback(
     (nodeType: FlowNodeType, label: string, status: 'loading' | 'done' | 'error' = 'done', detail?: string) => {
@@ -199,7 +210,7 @@ export default function MCPDemo() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Flow Panel */}
         <div className="w-[35%] min-w-[320px] border-r border-gray-800 bg-gray-900/50">
-          <FlowPanel nodes={flowNodes} isStreaming={isStreaming} />
+          <FlowPanel nodes={flowNodes} isStreaming={isStreaming} tools={mcpTools} />
         </div>
 
         {/* Right: Chat Panel */}

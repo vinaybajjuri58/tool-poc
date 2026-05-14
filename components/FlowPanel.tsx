@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { FlowNodeType } from "@/types"
 
 interface FlowNode {
@@ -9,6 +9,12 @@ interface FlowNode {
   label: string
   status: "loading" | "done" | "error"
   detail?: string
+}
+
+export interface ToolInfo {
+  name: string
+  description: string
+  parameters?: Record<string, unknown>
 }
 
 const NODE_ICON: Record<FlowNodeType, string> = {
@@ -23,10 +29,12 @@ const NODE_ICON: Record<FlowNodeType, string> = {
 interface FlowPanelProps {
   nodes: FlowNode[]
   isStreaming: boolean
+  tools?: ToolInfo[]
 }
 
-export default function FlowPanel({ nodes, isStreaming }: FlowPanelProps) {
+export default function FlowPanel({ nodes, isStreaming, tools }: FlowPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [toolsOpen, setToolsOpen] = useState(false)
 
   useEffect(() => {
     if (containerRef.current) {
@@ -41,6 +49,51 @@ export default function FlowPanel({ nodes, isStreaming }: FlowPanelProps) {
           Reasoning Flow
         </h2>
       </div>
+
+      {tools && tools.length > 0 && (
+        <div className="shrink-0 border-b border-gray-800">
+          <button
+            onClick={() => setToolsOpen(!toolsOpen)}
+            className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-gray-900/50 transition-colors"
+          >
+            <span className="text-xs font-medium text-gray-400">
+              Available Tools ({tools.length})
+            </span>
+            <span
+              className={`text-xs text-gray-500 transition-transform duration-200 ${
+                toolsOpen ? 'rotate-90' : ''
+              }`}
+            >
+              ▶
+            </span>
+          </button>
+
+          {toolsOpen && (
+            <div className="px-4 pb-3 space-y-1.5 max-h-[300px] overflow-y-auto">
+              {tools.map((tool) => (
+                <details
+                  key={tool.name}
+                  className="group"
+                >
+                  <summary className="cursor-pointer text-xs text-gray-400 hover:text-teal-400 transition-colors py-1 font-mono select-none">
+                    {tool.name}
+                  </summary>
+                  <div className="pl-1 mt-0.5 space-y-1">
+                    <p className="text-[11px] text-gray-500 leading-relaxed">
+                      {tool.description}
+                    </p>
+                    {tool.parameters && (
+                      <pre className="text-[10px] text-gray-600 font-mono bg-gray-800/30 rounded p-1.5 overflow-x-auto">
+                        {JSON.stringify(tool.parameters, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                </details>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div
         ref={containerRef}
