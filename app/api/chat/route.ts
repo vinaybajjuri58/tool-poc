@@ -1,4 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { TOOLS } from '@/lib/tools';
 import { executeTool } from '@/lib/tool-executor';
 
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
     });
   }
 
-  const anthropic = new Anthropic({ apiKey });
+  const openai = new OpenAI({ apiKey });
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -37,94 +38,129 @@ export async function POST(req: Request) {
       };
 
       try {
-        const history: Anthropic.Messages.MessageParam[] = [...messages];
+        const conversation: ChatCompletionMessageParam[] = [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ];
 
         while (true) {
           send({
             type: 'flow_node',
             nodeType: 'ai_request',
-            label: 'Claude API',
+            label: 'OpenAI API',
             status: 'loading',
           });
 
-          const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-20250514',
+          const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
             max_tokens: 1024,
-            system: SYSTEM_PROMPT,
-            tools: TOOLS as any,
-            messages: history,
+            messages: conversation,
+            tools: TOOLS,
+            stream: true,
           });
 
-          send({
-            type: 'update_node',
-            status: 'done',
-            detail: `stop: ${response.stop_reason}`,
-          });
+          let fullText = '';
+          const toolCallMap = new Map<
+            number,
+            { id: string; name: string; arguments: string }
+          >();
 
-          if (response.stop_reason === 'tool_use') {
-            const toolResults: Anthropic.Messages.ToolResultBlockParam[] = [];
+          for await (const chunk of response) {
+            const delta = chunk.choices[0]?.delta;
 
-            for (const block of response.content) {
-              if (block.type === 'tool_use') {
-                const toolInput = block.input as Record<string, unknown>;
+            if (delta?.content) {
+              fullText += delta.content;
+            }
 
-                send({
-                  type: 'flow_node',
-                  nodeType: 'tool_call',
-                  label: `Tool: ${block.name}`,
-                  detail: JSON.stringify(toolInput),
-                });
-
-                send({
-                  type: 'flow_node',
-                  nodeType: 'tool_execute',
-                  label: 'Executing...',
-                  status: 'loading',
-                });
-
-                const result = await executeTool(block.name, toolInput);
-
-                const resultStr = JSON.stringify(result);
-
-                send({
-                  type: 'update_node',
-                  status: 'done',
-                  detail: `${resultStr.slice(0, 80)}${resultStr.length > 80 ? '...' : ''}`,
-                });
-
-                send({
-                  type: 'flow_node',
-                  nodeType: 'tool_result',
-                  label: 'Tool Result',
-                });
-
-                toolResults.push({
-                  type: 'tool_result',
-                  tool_use_id: block.id,
-                  content: resultStr,
-                });
+            if (delta?.tool_calls) {
+              for (const tc of delta.tool_calls) {
+                const index = tc.index;
+                if (!toolCallMap.has(index)) {
+                  toolCallMap.set(index, {
+                    id: tc.id ?? '',
+                    name: tc.function?.name ?? '',
+                    arguments: '',
+                  });
+                }
+                const entry = toolCallMap.get(index)!;
+                if (tc.id) entry.id = tc.id;
+                if (tc.function?.name) entry.name = tc.function.name;
+                if (tc.function?.arguments) entry.arguments += tc.function.arguments;
               }
             }
 
-            history.push({
-              role: 'assistant',
-              content: response.content,
-            });
-            history.push({
-              role: 'user',
-              content: toolResults,
-            });
-          } else {
-            const text =
-              response.content.find((b) => b.type === 'text')?.text ?? '';
+            const finishReason = chunk.choices[0]?.finish_reason;
+            if (finishReason) {
+              send({
+                type: 'update_node',
+                status: 'done',
+                detail: `stop: ${finishReason}`,
+              });
+            }
+          }
 
+          const toolCalls = Array.from(toolCallMap.entries())
+            .sort(([a], [b]) => a - b)
+            .map(([, tc]) => tc);
+
+          if (toolCalls.length > 0) {
+            const assistantToolMsg: ChatCompletionMessageParam = {
+              role: 'assistant',
+              content: null,
+              tool_calls: toolCalls.map((tc) => ({
+                id: tc.id,
+                type: 'function' as const,
+                function: { name: tc.name, arguments: tc.arguments },
+              })),
+            };
+            conversation.push(assistantToolMsg);
+
+            for (const tc of toolCalls) {
+              const toolInput = JSON.parse(tc.arguments);
+
+              send({
+                type: 'flow_node',
+                nodeType: 'tool_call',
+                label: `Tool: ${tc.name}`,
+                detail: JSON.stringify(toolInput),
+              });
+
+              send({
+                type: 'flow_node',
+                nodeType: 'tool_execute',
+                label: 'Executing...',
+                status: 'loading',
+              });
+
+              const result = await executeTool(tc.name, toolInput);
+              const resultStr = JSON.stringify(result);
+
+              send({
+                type: 'update_node',
+                status: 'done',
+                detail: `${resultStr.slice(0, 80)}${resultStr.length > 80 ? '...' : ''}`,
+              });
+
+              send({
+                type: 'flow_node',
+                nodeType: 'tool_result',
+                label: 'Tool Result',
+              });
+
+              conversation.push({
+                role: 'tool',
+                tool_call_id: tc.id,
+                content: resultStr,
+              });
+            }
+          } else {
             send({
               type: 'flow_node',
               nodeType: 'ai_response',
               label: 'Final Response',
             });
 
-            send({ type: 'chat_response', content: text });
+            send({ type: 'chat_response', content: fullText });
             controller.close();
             break;
           }

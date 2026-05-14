@@ -153,13 +153,13 @@ export default function Home() {
         {showApiInput ? (
           <div className="flex items-center gap-2">
             <label className="text-xs text-gray-400 font-medium whitespace-nowrap">
-              Anthropic API Key
+              OpenAI API Key
             </label>
             <input
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-ant-..."
+              placeholder="sk-..."
               className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 placeholder-gray-500 w-64 focus:outline-none focus:border-blue-500/50"
             />
             <button
