@@ -161,6 +161,12 @@ export default function Home() {
           >
             Swiggy MCP →
           </Link>
+          <Link
+            href="/knowledge-graph"
+            className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors ml-2 flex items-center gap-1"
+          >
+            Knowledge Graph →
+          </Link>
         </div>
 
         <div className="flex-1" />

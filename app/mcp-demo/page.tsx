@@ -168,6 +168,12 @@ export default function MCPDemo() {
           <span className="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-medium">
             MCP
           </span>
+          <Link
+            href="/knowledge-graph"
+            className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors ml-2 flex items-center gap-1"
+          >
+            Knowledge Graph →
+          </Link>
         </div>
 
         <div className="flex-1" />
