@@ -71,9 +71,9 @@ export default function KnowledgeGraphPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
+            className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
           >
-            ← Customer Support
+            ← Home
           </Link>
           <div className="w-px h-5 bg-gray-700" />
           <span className="text-lg">🕸️</span>

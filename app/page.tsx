@@ -1,226 +1,137 @@
-'use client';
-
-import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import FlowPanel from '@/components/FlowPanel';
-import type { ToolInfo } from '@/components/FlowPanel';
-import ChatPanel from '@/components/ChatPanel';
-import { TOOLS } from '@/lib/tools';
-import type { ChatMessage, FlowNodeType } from '@/types';
 
-interface FlowNode {
-  id: string;
-  nodeType: FlowNodeType;
-  label: string;
-  status: 'loading' | 'done' | 'error';
-  detail?: string;
-}
+const DEMOS = [
+  {
+    href: '/customer-support',
+    icon: '🤖',
+    title: 'Customer Support AI',
+    badge: 'Chat',
+    badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    accentColor: 'blue',
+    description:
+      'AI-powered customer support agent with live tool execution. Look up customers, check order history, and review support issues — all through natural conversation with real-time reasoning flow.',
+    features: ['Live tool execution', 'Real-time reasoning flow', 'Google Sheets backend'],
+  },
+  {
+    href: '/mcp-demo',
+    icon: '🛵',
+    title: 'Swiggy MCP Demo',
+    badge: 'MCP',
+    badgeColor: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    accentColor: 'orange',
+    description:
+      'Model Context Protocol integration with Swiggy\'s food API. Dynamically discover and call MCP tools — search restaurants, find dishes, and explore food delivery options with live tool streaming.',
+    features: ['MCP protocol', 'Dynamic tool discovery', 'Streaming SSE responses'],
+  },
+  {
+    href: '/knowledge-graph',
+    icon: '🕸️',
+    title: 'Knowledge Graph',
+    badge: 'AI',
+    badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    accentColor: 'purple',
+    description:
+      'Extract entities and relationships from any text using AI. Paste articles, bios, or research — and watch a force-directed knowledge graph visualize connections between people, places, and concepts.',
+    features: ['Entity extraction', 'Force-directed graph', 'Interactive visualization'],
+  },
+];
 
-export default function Home() {
-  const [apiKey, setApiKey] = useState('');
-  const [showApiInput, setShowApiInput] = useState(true);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [flowNodes, setFlowNodes] = useState<FlowNode[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const nodeMapRef = useRef<Map<string, number>>(new Map());
-  let nodeCounter = useRef(0);
+const accentBorders: Record<string, string> = {
+  blue: 'hover:border-blue-500/40',
+  orange: 'hover:border-orange-500/40',
+  purple: 'hover:border-purple-500/40',
+};
 
-  const customerTools: ToolInfo[] = TOOLS.map((t) => ({
-    name: t.function.name,
-    description: t.function.description || '',
-    rawDefinition: JSON.stringify(t, null, 2),
-  }));
+const accentHovers: Record<string, string> = {
+  blue: 'group-hover:text-blue-400',
+  orange: 'group-hover:text-orange-400',
+  purple: 'group-hover:text-purple-400',
+};
 
-  const addFlowNode = useCallback(
-    (nodeType: FlowNodeType, label: string, status: 'loading' | 'done' | 'error' = 'done', detail?: string) => {
-      const id = `node-${++nodeCounter.current}`;
-      setFlowNodes((prev) => {
-        nodeMapRef.current.set(id, prev.length);
-        return [...prev, { id, nodeType, label, status, detail }];
-      });
-      return id;
-    },
-    []
-  );
-
-  const updateFlowNode = useCallback((status: 'loading' | 'done' | 'error', detail?: string) => {
-    setFlowNodes((prev) => {
-      const updated = [...prev];
-      for (let i = updated.length - 1; i >= 0; i--) {
-        if (updated[i].status === 'loading') {
-          updated[i] = { ...updated[i], status, detail };
-          break;
-        }
-      }
-      return updated;
-    });
-  }, []);
-
-  const addMessage = useCallback((role: 'user' | 'assistant', content: string) => {
-    const id = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    setMessages((prev) => [...prev, { id, role, content }]);
-  }, []);
-
-  const handleSend = useCallback(
-    async (text: string) => {
-      if (!apiKey.trim()) {
-        setShowApiInput(true);
-        return;
-      }
-
-      addMessage('user', text);
-      setFlowNodes([]);
-      nodeCounter.current = 0;
-      nodeMapRef.current.clear();
-      setIsStreaming(true);
-
-      addFlowNode('user', 'Message received');
-
-      const history = messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-      history.push({ role: 'user', content: text });
-
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: history, apiKey }),
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          addMessage('assistant', `Error: ${err.error || 'Request failed'}`);
-          setIsStreaming(false);
-          return;
-        }
-
-        const reader = response.body!.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            try {
-              const event = JSON.parse(line.slice(6));
-
-              switch (event.type) {
-                case 'flow_node':
-                  addFlowNode(
-                    event.nodeType,
-                    event.label,
-                    event.status || 'done',
-                    event.detail
-                  );
-                  break;
-                case 'update_node':
-                  updateFlowNode(event.status, event.detail);
-                  break;
-                case 'chat_response':
-                  addMessage('assistant', event.content);
-                  break;
-                case 'error':
-                  addMessage('assistant', `Error: ${event.content}`);
-                  break;
-              }
-            } catch {
-              // skip malformed JSON
-            }
-          }
-        }
-      } catch (error: any) {
-        addMessage('assistant', `Connection error: ${error.message}`);
-      } finally {
-        setIsStreaming(false);
-      }
-    },
-    [apiKey, messages, addFlowNode, updateFlowNode, addMessage]
-  );
-
+export default function HomePage() {
   return (
-    <div className="h-screen flex flex-col bg-gray-950 text-gray-100">
-      {/* Header with API Key */}
-      <header className="shrink-0 border-b border-gray-800 px-4 py-3 flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🤖</span>
-          <h1 className="text-sm font-bold text-gray-200">
-            Customer Support AI
-          </h1>
-          <Link
-            href="/mcp-demo"
-            className="text-[11px] text-teal-400 hover:text-teal-300 transition-colors ml-3 flex items-center gap-1"
-          >
-            Swiggy MCP →
-          </Link>
-          <Link
-            href="/knowledge-graph"
-            className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors ml-2 flex items-center gap-1"
-          >
-            Knowledge Graph →
-          </Link>
+    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
+      {/* Header */}
+      <header className="border-b border-gray-800 px-6 py-4 flex items-center gap-3">
+        <span className="text-xl">⚡</span>
+        <div>
+          <h1 className="text-sm font-bold text-gray-200">AI Demos</h1>
+          <p className="text-[11px] text-gray-600">
+            Customer support, MCP protocol, and knowledge graph experiments
+          </p>
         </div>
-
         <div className="flex-1" />
-
-        {showApiInput ? (
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-400 font-medium whitespace-nowrap">
-              OpenAI API Key
-            </label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-..."
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 placeholder-gray-500 w-64 focus:outline-none focus:border-blue-500/50"
-            />
-            <button
-              onClick={() => setShowApiInput(false)}
-              disabled={!apiKey.trim()}
-              className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-gray-200 rounded px-3 py-1.5 transition-colors"
-            >
-              Save
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowApiInput(true)}
-            className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1 transition-colors"
-          >
-            <span>🔑</span>
-            <span className="font-mono">
-              {apiKey.slice(0, 10)}...
-            </span>
-            <span className="text-gray-600">Change</span>
-          </button>
-        )}
+        <Link
+          href="https://github.com"
+          target="_blank"
+          className="text-[11px] text-gray-600 hover:text-gray-400 transition-colors"
+        >
+          View on GitHub ↗
+        </Link>
       </header>
 
-      {/* Main split panel */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left: Flow Panel */}
-        <div className="w-[35%] min-w-[320px] border-r border-gray-800 bg-gray-900/50">
-          <FlowPanel nodes={flowNodes} isStreaming={isStreaming} tools={customerTools} />
-        </div>
+      {/* Main content */}
+      <main className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-5xl space-y-8">
+          <div className="text-center space-y-2">
+            <p className="text-xs text-gray-600 uppercase tracking-widest">
+              Choose a Demo
+            </p>
+            <p className="text-sm text-gray-500 max-w-md mx-auto">
+              Three AI-powered tools built with Next.js, OpenAI, and streaming
+              server-sent events
+            </p>
+          </div>
 
-        {/* Right: Chat Panel */}
-        <div className="flex-1 bg-gray-950">
-          <ChatPanel
-            messages={messages}
-            onSend={handleSend}
-            isStreaming={isStreaming}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {DEMOS.map((demo) => (
+              <Link
+                key={demo.href}
+                href={demo.href}
+                className={`group block bg-gray-900 border border-gray-800 ${accentBorders[demo.accentColor]} rounded-xl p-5 transition-all hover:bg-gray-900/80 hover:-translate-y-0.5`}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl">{demo.icon}</span>
+                  <div>
+                    <h2
+                      className={`text-sm font-semibold text-gray-200 ${accentHovers[demo.accentColor]} transition-colors`}
+                    >
+                      {demo.title}
+                    </h2>
+                  </div>
+                  <span
+                    className={`ml-auto text-[10px] px-2 py-0.5 rounded-full border font-medium ${demo.badgeColor}`}
+                  >
+                    {demo.badge}
+                  </span>
+                </div>
+
+                <p className="text-xs text-gray-500 leading-relaxed mb-4 line-clamp-4">
+                  {demo.description}
+                </p>
+
+                <div className="space-y-1.5">
+                  {demo.features.map((f) => (
+                    <div
+                      key={f}
+                      className="flex items-center gap-2 text-[11px] text-gray-600"
+                    >
+                      <span
+                        className={`w-1 h-1 rounded-full bg-${demo.accentColor}-500/50`}
+                      />
+                      {f}
+                    </div>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <p className="text-center text-[10px] text-gray-700">
+            Requires an OpenAI API key • All demos use gpt-4o-mini
+          </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

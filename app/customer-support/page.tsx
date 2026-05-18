@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import FlowPanel from '@/components/FlowPanel';
 import type { ToolInfo } from '@/components/FlowPanel';
 import ChatPanel from '@/components/ChatPanel';
+import { TOOLS } from '@/lib/tools';
 import type { ChatMessage, FlowNodeType } from '@/types';
 
 interface FlowNode {
@@ -15,24 +16,20 @@ interface FlowNode {
   detail?: string;
 }
 
-export default function MCPDemo() {
+export default function CustomerSupportPage() {
   const [apiKey, setApiKey] = useState('');
   const [showApiInput, setShowApiInput] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [flowNodes, setFlowNodes] = useState<FlowNode[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [mcpTools, setMcpTools] = useState<ToolInfo[]>([]);
   const nodeMapRef = useRef<Map<string, number>>(new Map());
   let nodeCounter = useRef(0);
 
-  useEffect(() => {
-    fetch('/api/mcp-tools')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.tools) setMcpTools(data.tools);
-      })
-      .catch(() => {});
-  }, []);
+  const customerTools: ToolInfo[] = TOOLS.map((t) => ({
+    name: t.function.name,
+    description: t.function.description || '',
+    rawDefinition: JSON.stringify(t, null, 2),
+  }));
 
   const addFlowNode = useCallback(
     (nodeType: FlowNodeType, label: string, status: 'loading' | 'done' | 'error' = 'done', detail?: string) => {
@@ -86,7 +83,7 @@ export default function MCPDemo() {
       history.push({ role: 'user', content: text });
 
       try {
-        const response = await fetch('/api/mcp-chat', {
+        const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ messages: history, apiKey }),
@@ -151,9 +148,9 @@ export default function MCPDemo() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-950 text-gray-100">
-      {/* Header */}
+      {/* Header with API Key */}
       <header className="shrink-0 border-b border-gray-800 px-4 py-3 flex items-center gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href="/"
             className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
@@ -161,13 +158,16 @@ export default function MCPDemo() {
             ← Home
           </Link>
           <div className="w-px h-5 bg-gray-700" />
-          <span className="text-lg">🛵</span>
+          <span className="text-lg">🤖</span>
           <h1 className="text-sm font-bold text-gray-200">
-            Swiggy MCP Demo
+            Customer Support AI
           </h1>
-          <span className="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-medium">
-            MCP
-          </span>
+          <Link
+            href="/mcp-demo"
+            className="text-[11px] text-teal-400 hover:text-teal-300 transition-colors ml-3 flex items-center gap-1"
+          >
+            Swiggy MCP →
+          </Link>
           <Link
             href="/knowledge-graph"
             className="text-[11px] text-purple-400 hover:text-purple-300 transition-colors ml-2 flex items-center gap-1"
@@ -188,7 +188,7 @@ export default function MCPDemo() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-..."
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 placeholder-gray-500 w-64 focus:outline-none focus:border-orange-500/50"
+              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 placeholder-gray-500 w-64 focus:outline-none focus:border-blue-500/50"
             />
             <button
               onClick={() => setShowApiInput(false)}
@@ -216,7 +216,7 @@ export default function MCPDemo() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Flow Panel */}
         <div className="w-[35%] min-w-[320px] border-r border-gray-800 bg-gray-900/50">
-          <FlowPanel nodes={flowNodes} isStreaming={isStreaming} tools={mcpTools} />
+          <FlowPanel nodes={flowNodes} isStreaming={isStreaming} tools={customerTools} />
         </div>
 
         {/* Right: Chat Panel */}
@@ -225,16 +225,6 @@ export default function MCPDemo() {
             messages={messages}
             onSend={handleSend}
             isStreaming={isStreaming}
-            placeholder="Ask about food, restaurants..."
-            suggestions={{
-              label: 'Ask about food, restaurants, or ordering',
-              queries: [
-                'Find biryani restaurants near me',
-                'Search for pizza places in Mumbai',
-                'Show me top-rated North Indian restaurants',
-                'What are the best desserts available?',
-              ],
-            }}
           />
         </div>
       </div>
