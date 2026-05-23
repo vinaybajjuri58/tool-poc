@@ -54,8 +54,8 @@ export default function KnowledgeGraphPage() {
       }
 
       setGraphData(data);
-    } catch (err: any) {
-      setError(err.message || 'Connection error');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Connection error');
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +83,12 @@ export default function KnowledgeGraphPage() {
           <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-medium">
             AI
           </span>
+          <Link
+            href="/zepto-demo"
+            className="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors ml-2 flex items-center gap-1"
+          >
+            Zepto MCP →
+          </Link>
         </div>
 
         <div className="flex-1" />

@@ -100,7 +100,6 @@ export default function FlowPanel({ nodes, isStreaming, tools }: FlowPanelProps)
 
         <div className="flex flex-col items-center gap-0">
           {nodes.map((node, i) => {
-            const isLast = i === nodes.length - 1
             const isLoading = node.status === "loading"
 
             const formattedDetail = node.detail

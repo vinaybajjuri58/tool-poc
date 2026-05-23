@@ -24,6 +24,17 @@ const DEMOS = [
     features: ['MCP protocol', 'Dynamic tool discovery', 'Streaming SSE responses'],
   },
   {
+    href: '/zepto-demo',
+    icon: '🛒',
+    title: 'Zepto MCP Demo',
+    badge: 'MCP',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    accentColor: 'emerald',
+    description:
+      'Quick-commerce MCP integration for Zepto. Search live product catalog data, build shopping carts, review order history, and handle real checkout flows with explicit confirmation.',
+    features: ['Zepto MCP', 'Product search', 'Real cart actions'],
+  },
+  {
     href: '/knowledge-graph',
     icon: '🕸️',
     title: 'Knowledge Graph',
@@ -39,12 +50,14 @@ const DEMOS = [
 const accentBorders: Record<string, string> = {
   blue: 'hover:border-blue-500/40',
   orange: 'hover:border-orange-500/40',
+  emerald: 'hover:border-emerald-500/40',
   purple: 'hover:border-purple-500/40',
 };
 
 const accentHovers: Record<string, string> = {
   blue: 'group-hover:text-blue-400',
   orange: 'group-hover:text-orange-400',
+  emerald: 'group-hover:text-emerald-400',
   purple: 'group-hover:text-purple-400',
 };
 
@@ -78,12 +91,12 @@ export default function HomePage() {
               Choose a Demo
             </p>
             <p className="text-sm text-gray-500 max-w-md mx-auto">
-              Three AI-powered tools built with Next.js, OpenAI, and streaming
+              Four AI-powered tools built with Next.js, OpenAI, and streaming
               server-sent events
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {DEMOS.map((demo) => (
               <Link
                 key={demo.href}

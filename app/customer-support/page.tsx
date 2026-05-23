@@ -23,7 +23,7 @@ export default function CustomerSupportPage() {
   const [flowNodes, setFlowNodes] = useState<FlowNode[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const nodeMapRef = useRef<Map<string, number>>(new Map());
-  let nodeCounter = useRef(0);
+  const nodeCounter = useRef(0);
 
   const customerTools: ToolInfo[] = TOOLS.map((t) => ({
     name: t.function.name,
@@ -137,8 +137,10 @@ export default function CustomerSupportPage() {
             }
           }
         }
-      } catch (error: any) {
-        addMessage('assistant', `Connection error: ${error.message}`);
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Unknown connection error';
+        addMessage('assistant', `Connection error: ${message}`);
       } finally {
         setIsStreaming(false);
       }
@@ -167,6 +169,12 @@ export default function CustomerSupportPage() {
             className="text-[11px] text-teal-400 hover:text-teal-300 transition-colors ml-3 flex items-center gap-1"
           >
             Swiggy MCP →
+          </Link>
+          <Link
+            href="/zepto-demo"
+            className="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors ml-2 flex items-center gap-1"
+          >
+            Zepto MCP →
           </Link>
           <Link
             href="/knowledge-graph"

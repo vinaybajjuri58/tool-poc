@@ -1,8 +1,8 @@
-import { getMCPTools } from '@/lib/mcp-client';
+import { getZeptoMCPTools } from '@/lib/zepto-mcp-client';
 
 export async function GET() {
   try {
-    const tools = await getMCPTools();
+    const tools = await getZeptoMCPTools();
     const simplified = tools.map((t) => ({
       name: t.function.name,
       description: t.function.description || '',
@@ -14,7 +14,9 @@ export async function GET() {
     return Response.json(
       {
         error:
-          error instanceof Error ? error.message : 'Failed to fetch MCP tools',
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch Zepto MCP tools',
       },
       { status: 500 }
     );

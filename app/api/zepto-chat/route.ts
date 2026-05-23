@@ -1,24 +1,27 @@
 import OpenAI from 'openai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { getMCPTools, callMCPTool } from '@/lib/mcp-client';
+import { getZeptoMCPTools, callZeptoMCPTool } from '@/lib/zepto-mcp-client';
 
 export const maxDuration = 120;
 
-const SYSTEM_PROMPT = `You are a helpful AI assistant with access to Swiggy's Food delivery service via MCP (Model Context Protocol).
+const SYSTEM_PROMPT = `You are a helpful AI shopping assistant with access to Zepto's quick-commerce platform via MCP (Model Context Protocol).
 
 You can help users:
-- Search for restaurants by cuisine, name, or dish
-- Browse restaurant menus and pricing
-- Manage their food cart (add items, view cart)
-- Place food orders and track deliveries
+- Search Zepto's live product catalog for groceries, household essentials, personal care, electronics, toys, stationery, and more
+- Compare available products, prices, quantities, and availability
+- Manage the user's Zepto cart when they explicitly ask
+- Retrieve order history when they explicitly ask
+- Help place real Zepto orders after explicit user confirmation
 
-When a user asks about food:
-1. If they want to find restaurants, use search_restaurants first
-2. Use the appropriate tools to explore menus, manage carts, and place orders
-3. Summarize findings clearly and conversationally
-4. Always confirm before placing an order
+Important safety and confirmation rules:
+1. Zepto MCP can interact with real Zepto accounts and real orders. Treat cart changes, checkout, payment, and order placement as real actions.
+2. Search and browse freely when the user asks for product recommendations or availability.
+3. Do not add, remove, or update cart items unless the user clearly asks you to do that.
+4. Before placing an order or initiating payment, summarize the cart, total if available, delivery/payment details if available, and ask for explicit confirmation.
+5. Never place an order, initiate payment, or choose a payment method without the user's explicit confirmation in the current conversation.
+6. If authentication, location, payment, or account access is required, explain what is needed and ask the user to complete the required step.
 
-Be polite, helpful, and food-enthusiastic! 🍕`;
+Be concise, practical, and clear about what action you are taking.`;
 
 export async function POST(req: Request) {
   const { messages, apiKey } = await req.json();
@@ -48,15 +51,15 @@ export async function POST(req: Request) {
           nodeType: 'ai_request',
           label: 'MCP Connect',
           status: 'loading',
-          detail: 'Connecting to Swiggy Food MCP...',
+          detail: 'Connecting to Zepto MCP...',
         });
 
-        const mcpTools = await getMCPTools();
+        const mcpTools = await getZeptoMCPTools();
 
         send({
           type: 'update_node',
           status: 'done',
-          detail: `Connected. ${mcpTools.length} tools available from Swiggy Food MCP.`,
+          detail: `Connected. ${mcpTools.length} tools available from Zepto MCP.`,
         });
 
         const conversation: ChatCompletionMessageParam[] = [
@@ -68,9 +71,9 @@ export async function POST(req: Request) {
           send({
             type: 'flow_node',
             nodeType: 'ai_request',
-            label: 'OpenAI + MCP Tools',
+            label: 'OpenAI + Zepto MCP',
             status: 'loading',
-            detail: `${mcpTools.length} Swiggy tools loaded`,
+            detail: `${mcpTools.length} Zepto tools loaded`,
           });
 
           const response = await openai.chat.completions.create({
@@ -143,19 +146,19 @@ export async function POST(req: Request) {
               send({
                 type: 'flow_node',
                 nodeType: 'tool_call',
-                label: `MCP: ${tc.name}`,
+                label: `Zepto MCP: ${tc.name}`,
                 detail: JSON.stringify(toolInput),
               });
 
               send({
                 type: 'flow_node',
                 nodeType: 'tool_execute',
-                label: 'Swiggy MCP →',
+                label: 'Zepto MCP ->',
                 status: 'loading',
               });
 
               try {
-                const result = await callMCPTool(tc.name, toolInput);
+                const result = await callZeptoMCPTool(tc.name, toolInput);
                 const resultStr = JSON.stringify(result);
 
                 send({
@@ -167,7 +170,7 @@ export async function POST(req: Request) {
                 send({
                   type: 'flow_node',
                   nodeType: 'tool_result',
-                  label: 'MCP Result',
+                  label: 'Zepto Result',
                 });
 
                 conversation.push({
@@ -177,7 +180,7 @@ export async function POST(req: Request) {
                 });
               } catch (err: unknown) {
                 const message =
-                  err instanceof Error ? err.message : 'MCP tool error';
+                  err instanceof Error ? err.message : 'Zepto MCP tool error';
 
                 send({
                   type: 'update_node',
@@ -188,7 +191,9 @@ export async function POST(req: Request) {
                 conversation.push({
                   role: 'tool',
                   tool_call_id: tc.id,
-                  content: JSON.stringify({ error: message || 'Tool execution failed' }),
+                  content: JSON.stringify({
+                    error: message || 'Tool execution failed',
+                  }),
                 });
               }
             }

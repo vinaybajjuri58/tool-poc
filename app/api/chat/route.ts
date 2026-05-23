@@ -173,10 +173,10 @@ export async function POST(req: Request) {
             break;
           }
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         send({
           type: 'error',
-          content: error?.message || 'Something went wrong',
+          content: error instanceof Error ? error.message : 'Something went wrong',
         });
         controller.close();
       }

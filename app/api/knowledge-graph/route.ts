@@ -111,10 +111,13 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify(graph), {
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return new Response(
       JSON.stringify({
-        error: error?.message || 'Failed to generate knowledge graph',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate knowledge graph',
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
