@@ -1,0 +1,322 @@
+{
+  "communities": {
+    "0": [
+      "app_api_chat_route",
+      "app_api_chat_route_post",
+      "app_customer_support_page",
+      "app_customer_support_page_customersupportpage",
+      "app_customer_support_page_flownode",
+      "app_mcp_demo_page",
+      "app_mcp_demo_page_flownode",
+      "app_mcp_demo_page_mcpdemo",
+      "app_zepto_demo_page",
+      "app_zepto_demo_page_flownode",
+      "app_zepto_demo_page_zeptodemo",
+      "components_chatpanel",
+      "components_chatpanel_chatpanel",
+      "components_chatpanel_chatpanelprops",
+      "components_flowpanel",
+      "components_flowpanel_flownode",
+      "components_flowpanel_flowpanel",
+      "components_flowpanel_flowpanelprops",
+      "components_flowpanel_node_icon",
+      "components_flowpanel_toolinfo",
+      "lib_markdown",
+      "lib_markdown_rendermarkdown",
+      "lib_tools",
+      "lib_tools_tools",
+      "types_index",
+      "types_index_chatmessage",
+      "types_index_flownode",
+      "types_index_flownodetype",
+      "types_index_ssechatevent"
+    ],
+    "1": [
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_esnext",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowjs",
+      "tsconfig_compileroptions_esmoduleinterop",
+      "tsconfig_compileroptions_incremental",
+      "tsconfig_compileroptions_isolatedmodules",
+      "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_lib",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_noemit",
+      "tsconfig_compileroptions_paths",
+      "tsconfig_compileroptions_plugins",
+      "tsconfig_compileroptions_resolvejsonmodule",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict",
+      "tsconfig_compileroptions_target"
+    ],
+    "2": [
+      "eslint",
+      "eslint_config_next",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_config_next",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_postcss",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "tailwindcss",
+      "tailwindcss_postcss",
+      "types_node",
+      "types_react",
+      "types_react_dom",
+      "typescript"
+    ],
+    "3": [
+      "force_graph",
+      "modelcontextprotocol_sdk",
+      "next",
+      "openai",
+      "package_dependencies",
+      "package_dependencies_force_graph",
+      "package_dependencies_modelcontextprotocol_sdk",
+      "package_dependencies_next",
+      "package_dependencies_openai",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_react_force_graph_2d",
+      "react",
+      "react_dom",
+      "react_force_graph_2d"
+    ],
+    "4": [
+      "app_knowledge_graph_page",
+      "app_knowledge_graph_page_example_texts",
+      "app_knowledge_graph_page_graphdata",
+      "app_knowledge_graph_page_knowledgegraphpage",
+      "components_knowledgegraphpanel",
+      "components_knowledgegraphpanel_entity",
+      "components_knowledgegraphpanel_forcegraph2d",
+      "components_knowledgegraphpanel_knowledgegraphpanel",
+      "components_knowledgegraphpanel_knowledgegraphpanelprops",
+      "components_knowledgegraphpanel_relationship",
+      "components_knowledgegraphpanel_type_colors"
+    ],
+    "5": [
+      "ref_mts",
+      "ref_next_dev_types_ts",
+      "ref_next_env_d_ts",
+      "ref_next_types_ts",
+      "ref_node_modules",
+      "ref_ts",
+      "ref_tsx",
+      "tsconfig",
+      "tsconfig_exclude",
+      "tsconfig_include"
+    ],
+    "6": [
+      "app_api_mcp_chat_route",
+      "app_api_mcp_chat_route_post",
+      "app_api_mcp_tools_route",
+      "app_api_mcp_tools_route_get",
+      "lib_mcp_client",
+      "lib_mcp_client_callmcptool",
+      "lib_mcp_client_connect",
+      "lib_mcp_client_getmcptools",
+      "lib_mcp_client_mcpconnection"
+    ],
+    "7": [
+      "app_api_zepto_chat_route",
+      "app_api_zepto_chat_route_post",
+      "app_api_zepto_tools_route",
+      "app_api_zepto_tools_route_get",
+      "lib_zepto_mcp_client",
+      "lib_zepto_mcp_client_callzeptomcptool",
+      "lib_zepto_mcp_client_connect",
+      "lib_zepto_mcp_client_getzeptomcptools",
+      "lib_zepto_mcp_client_mcpconnection"
+    ],
+    "8": [
+      "lib_data",
+      "lib_data_fetchsheet",
+      "lib_data_getcustomerbyid",
+      "lib_data_getorderhistory",
+      "lib_data_getsupportissues",
+      "lib_data_parsecsv",
+      "lib_data_searchcustomerbyname",
+      "lib_tool_executor",
+      "lib_tool_executor_executetool"
+    ],
+    "9": [
+      "package",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_version"
+    ],
+    "10": [
+      "app_layout",
+      "app_layout_geistmono",
+      "app_layout_geistsans",
+      "app_layout_metadata",
+      "app_layout_rootlayout"
+    ],
+    "11": [
+      "app_page",
+      "app_page_accentborders",
+      "app_page_accenthovers",
+      "app_page_demos",
+      "app_page_homepage"
+    ],
+    "12": [
+      "app_api_knowledge_graph_route",
+      "app_api_knowledge_graph_route_post"
+    ],
+    "13": [
+      "eslint_config",
+      "eslint_config_eslintconfig"
+    ],
+    "14": [
+      "next_config",
+      "next_config_nextconfig"
+    ],
+    "15": [
+      "postcss_config",
+      "postcss_config_config"
+    ]
+  },
+  "cohesion": {
+    "0": 0.1330049261083744,
+    "1": 0.10526315789473684,
+    "2": 0.11764705882352941,
+    "3": 0.13333333333333333,
+    "4": 0.2727272727272727,
+    "5": 0.2,
+    "6": 0.3888888888888889,
+    "7": 0.3888888888888889,
+    "8": 0.5833333333333334,
+    "9": 0.2222222222222222,
+    "10": 0.4,
+    "11": 0.4,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0
+  },
+  "gods": [
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 16
+    },
+    {
+      "id": "types_index_flownodetype",
+      "label": "FlowNodeType",
+      "degree": 9
+    },
+    {
+      "id": "tsconfig_include",
+      "label": "include",
+      "degree": 7
+    },
+    {
+      "id": "lib_data_fetchsheet",
+      "label": "fetchSheet()",
+      "degree": 6
+    },
+    {
+      "id": "lib_tool_executor_executetool",
+      "label": "executeTool()",
+      "degree": 6
+    },
+    {
+      "id": "types_index_chatmessage",
+      "label": "ChatMessage",
+      "degree": 6
+    },
+    {
+      "id": "lib_mcp_client_getmcptools",
+      "label": "getMCPTools()",
+      "degree": 5
+    },
+    {
+      "id": "lib_zepto_mcp_client_getzeptomcptools",
+      "label": "getZeptoMCPTools()",
+      "degree": 5
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 5
+    },
+    {
+      "id": "components_flowpanel_toolinfo",
+      "label": "ToolInfo",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "GET()",
+      "target": "getMCPTools()",
+      "source_files": [
+        "app/api/mcp-tools/route.ts",
+        "lib/mcp-client.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `GET()` unexpectedly reaches hub `getMCPTools()`"
+    },
+    {
+      "source": "GET()",
+      "target": "getZeptoMCPTools()",
+      "source_files": [
+        "app/api/zepto-tools/route.ts",
+        "lib/zepto-mcp-client.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `GET()` unexpectedly reaches hub `getZeptoMCPTools()`"
+    },
+    {
+      "source": "FlowNode",
+      "target": "FlowNodeType",
+      "source_files": [
+        "app/customer-support/page.tsx",
+        "types/index.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; peripheral node `FlowNode` unexpectedly reaches hub `FlowNodeType`"
+    },
+    {
+      "source": "FlowNode",
+      "target": "FlowNodeType",
+      "source_files": [
+        "app/mcp-demo/page.tsx",
+        "types/index.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; peripheral node `FlowNode` unexpectedly reaches hub `FlowNodeType`"
+    },
+    {
+      "source": "FlowNode",
+      "target": "FlowNodeType",
+      "source_files": [
+        "app/zepto-demo/page.tsx",
+        "types/index.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; peripheral node `FlowNode` unexpectedly reaches hub `FlowNodeType`"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}
